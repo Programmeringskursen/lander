@@ -1,0 +1,68 @@
+#!/usr/bin/env python
+import pygame
+import sys
+import moon
+import stars
+import lander
+
+screenSize = (800, 600)
+black = (0, 0, 0)
+groundLevel = 550
+maxLandingVelocity = 15
+
+# Initialize pygame and open a window
+pygame.init()
+screen = pygame.display.set_mode(screenSize)
+
+theMoon = moon.Moon(screen, groundLevel)
+theStars = stars.StarField(screen)
+theLander = lander.Lander(screen, 400, 100)
+
+pygame.time.set_timer(pygame.USEREVENT, 1000 / 60)
+
+def updateScreen():
+    screen.fill(black)
+    theStars.draw()
+    theMoon.draw()
+    theLander.draw()
+    pygame.display.update()
+
+updateScreen()
+
+while True:
+    event = pygame.event.wait()
+
+    if event.type == pygame.QUIT: # window closed
+        pygame.quit()
+        sys.exit()
+
+    if event.type == pygame.USEREVENT: # timer elapsed
+        theLander.update()
+        if theLander.y >= groundLevel:
+            break
+        theStars.update()
+        updateScreen()
+
+    if event.type == pygame.KEYUP: # key released
+        if event.key == pygame.K_LEFT:
+            theLander.setThrustX(0)
+        elif event.key == pygame.K_RIGHT:
+            theLander.setThrustX(0)
+        elif event.key == pygame.K_UP:
+            theLander.setThrustY(0)
+
+    if event.type == pygame.KEYDOWN: # key pressed
+        if event.key == pygame.K_LEFT:
+            theLander.setThrustX(-1)
+        elif event.key == pygame.K_RIGHT:
+            theLander.setThrustX(1)
+        elif event.key == pygame.K_UP:
+            theLander.setThrustY(-1)
+
+# Game over!
+landingVelocity = theLander.getVelocity()
+
+if(landingVelocity > maxLandingVelocity):
+    print("Crashed with velocity ", landingVelocity)
+else:
+    print("Touchdown!")
